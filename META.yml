@@ -3,6 +3,7 @@ abstract: 'Lightweight objects for AnyEvent::HTTP Request/Response'
 author:
   - 'Randy Stauner <rwstauner@cpan.org>'
 build_requires:
+  Exporter: 0
   File::Find: 0
   File::Temp: 0
   Test::More: 0.88
@@ -31,16 +32,17 @@ no_index:
 provides:
   AnyEvent::HTTP::Message:
     file: lib/AnyEvent/HTTP/Message.pm
-    version: 0.100
+    version: 0.300
   AnyEvent::HTTP::Request:
     file: lib/AnyEvent/HTTP/Request.pm
-    version: 0.100
+    version: 0.300
   AnyEvent::HTTP::Response:
     file: lib/AnyEvent/HTTP/Response.pm
-    version: 0.100
+    version: 0.300
 requires:
   AnyEvent::HTTP: 2
   Carp: 0
+  Scalar::Util: 0
   parent: 0
   perl: 5.006
   strict: 0
@@ -49,7 +51,7 @@ resources:
   bugtracker: http://rt.cpan.org/Public/Dist/Display.html?Name=AnyEvent-HTTP-Message
   homepage: https://github.com/rwstauner/AnyEvent-HTTP-Message
   repository: https://github.com/rwstauner/AnyEvent-HTTP-Message.git
-version: 0.100
+version: 0.300
 x_Dist_Zilla:
   plugins:
     -
@@ -295,6 +297,14 @@ x_Dist_Zilla:
           phase: runtime
           type: requires
       name: Prereqs
+      version: 4.300014
+    -
+      class: Dist::Zilla::Plugin::Prereqs
+      config:
+        Dist::Zilla::Plugin::Prereqs:
+          phase: runtime
+          type: suggests
+      name: RuntimeSuggests
       version: 4.300014
     -
       class: Dist::Zilla::Plugin::FinderCode

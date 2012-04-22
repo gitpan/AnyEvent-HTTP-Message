@@ -12,7 +12,7 @@ use warnings;
 
 package AnyEvent::HTTP::Message;
 {
-  $AnyEvent::HTTP::Message::VERSION = '0.100';
+  $AnyEvent::HTTP::Message::VERSION = '0.300';
 }
 BEGIN {
   $AnyEvent::HTTP::Message::AUTHORITY = 'cpan:RWSTAUNER';
@@ -20,32 +20,66 @@ BEGIN {
 # ABSTRACT: Lightweight objects for AnyEvent::HTTP Request/Response
 
 use Carp ();
+use Scalar::Util ();
 
 
 sub new {
   my $class = shift;
 
-  my $self = @_ == 1 && ref($_[0]) eq 'HASH'
-      # if passed a single hashref take a shallow copy
-    ? { %{ $_[0] } }
+  my $self;
+  if( ref($_[0]) eq 'HASH' ){
+    # if passed a single hashref take a shallow copy
+    $self = { %{ $_[0] } };
+  }
+  elsif( Scalar::Util::blessed($_[0]) && $_[0]->isa('HTTP::Message') ){
+    # allow an optional second hashref for extra params
+    $self = $class->from_http_message(@_);
+  }
+  else {
       # otherwise it's the argument list for http_request()
-    : $class->parse_args(@_);
+    $self = $class->parse_args(@_);
+  }
 
   # accept 'content' as an alias for 'body', but store as 'body'
   $self->{body} = delete $self->{content}
     if exists $self->{content};
 
+  $self->{body} = ''
+    if !defined $self->{body};
+
+  $self->{headers} = $self->{headers}
+    ? $class->_normalize_headers($self->{headers})
+    : {};
+
   bless $self, $class;
 }
 
+sub _error {
+  my $self = shift;
+  @_ = join ' ', (ref($self) || $self), 'error:', @_;
+  goto &Carp::croak;
+}
 
 
 sub parse_args {
-  my $self = shift;
-  Carp::croak( join ' ',
-    (ref($self) || $self),
-    'has not defined a parse_args() method'
-  );
+  $_[0]->_error('parse_args() is not defined');
+}
+
+
+sub from_http_message {
+  $_[0]->_error('from_http_message() is not defined');
+}
+
+# turn HTTP::Headers into a hashref
+sub _hash_http_headers {
+  my ($self, $headers) = @_;
+  my $aeh = {};
+  $headers->scan(sub {
+    my ($k, $v) = @_;
+    my $l = lc $k;
+    $aeh->{$l} = exists($aeh->{$l}) ? $aeh->{$l} . ',' . $v : $v;
+  });
+  return $aeh;
 }
 
 
@@ -63,6 +97,7 @@ sub header {
   return $self->headers->{ lc $h };
 }
 
+# ensure keys are stored with dashes (not underscores) and lower-cased
 sub _normalize_headers {
   my ($self, $headers) = @_;
   my $norm = {};
@@ -92,7 +127,7 @@ AnyEvent::HTTP::Message - Lightweight objects for AnyEvent::HTTP Request/Respons
 
 =head1 VERSION
 
-version 0.100
+version 0.300
 
 =head1 SYNOPSIS
 
@@ -118,14 +153,37 @@ L<AnyEvent::HTTP::Response>
 
 =head2 new
 
-The constructor accepts either a single hashref of named arguments,
-or a specialized list of arguments that will be passed to
-a the L</parse_args> method (which must be defined by the subclass).
+The constructor accepts either:
+
+=over 4
+
+=item *
+
+a single hashref of named arguments
+
+=item *
+
+an instance of an appropriate subclass of L<HTTP::Message> (with an optional hashref of additional parameters)
+
+=item *
+
+or a specialized list of arguments that will be passed to L</parse_args> (which must be defined by the subclass).
+
+=back
 
 =head2 parse_args
 
 Called by the constructor
-when L</new> is not called with a single hashref.
+when L</new> is called with
+a list of arguments.
+
+Must be customized by subclasses.
+
+=head2 from_http_message
+
+Called by the constructor
+when L</new> is called with
+an instance of a L<HTTP::Message> subclass.
 
 Must be customized by subclasses.
 
@@ -151,7 +209,7 @@ Message headers (hashref)
   # same as $message->header->{'user-agent'};
 
 Takes the specified key,
-converts C<_> to C<-> and lower-cases it,
+converts underscores to dashes and lower-cases it,
 then returns the value of that message header.
 
 =head1 SUPPORT

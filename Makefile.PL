@@ -12,6 +12,7 @@ my %WriteMakefileArgs = (
   "ABSTRACT" => "Lightweight objects for AnyEvent::HTTP Request/Response",
   "AUTHOR" => "Randy Stauner <rwstauner\@cpan.org>",
   "BUILD_REQUIRES" => {
+    "Exporter" => 0,
     "File::Find" => 0,
     "File::Temp" => 0,
     "Test::More" => "0.88"
@@ -26,11 +27,12 @@ my %WriteMakefileArgs = (
   "PREREQ_PM" => {
     "AnyEvent::HTTP" => 2,
     "Carp" => 0,
+    "Scalar::Util" => 0,
     "parent" => 0,
     "strict" => 0,
     "warnings" => 0
   },
-  "VERSION" => "0.100",
+  "VERSION" => "0.300",
   "test" => {
     "TESTS" => "t/*.t"
   }

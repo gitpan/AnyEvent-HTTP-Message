@@ -12,7 +12,7 @@ use warnings;
 
 package AnyEvent::HTTP::Response;
 {
-  $AnyEvent::HTTP::Response::VERSION = '0.100';
+  $AnyEvent::HTTP::Response::VERSION = '0.300';
 }
 BEGIN {
   $AnyEvent::HTTP::Response::AUTHORITY = 'cpan:RWSTAUNER';
@@ -20,19 +20,6 @@ BEGIN {
 # ABSTRACT: HTTP Response object for AnyEvent::HTTP
 
 use parent 'AnyEvent::HTTP::Message';
-use Carp ();
-
-
-sub new {
-  my $class = shift;
-  my $self = $class->SUPER::new(@_);
-
-  if( my $h = $self->{headers} ){
-    $self->{headers} = $self->_normalize_headers($h);
-  }
-
-  return $self;
-}
 
 
 sub args {
@@ -49,9 +36,8 @@ sub args {
 
 sub parse_args {
   my $self = shift;
-  Crap::croak(
-    (ref($self) || $self) .
-    q[ expects two arguments: ($content_body, \%headers)]
+  $self->_error(
+    q[expects two arguments: ($content_body, \%headers)]
   )
     unless @_ == 2;
 
@@ -72,7 +58,42 @@ sub parse_args {
 }
 
 
+sub from_http_message {
+  my ($self, $res) = @_;
+  my $args = {
+    body => $res->${\ ($res->can('decoded_content') || 'content') },
+    pseudo_headers => {
+      Status => $res->code,
+      Reason => $res->message,
+    },
+    headers => $self->_hash_http_headers($res->headers),
+  };
+  if( my $proto = $res->protocol ){
+    # regexp taken straight from AnyEvent::HTTP 2.13
+    $args->{pseudo_headers}{HTTPVersion} = ($proto =~ /^HTTP\/0*([0-9\.]+)/)[0];
+  }
+
+  return $args;
+}
+
+
 sub pseudo_headers { $_[0]->{pseudo_headers} ||= {} }
+
+
+sub to_http_message {
+  my ($self) = @_;
+  require HTTP::Response;
+
+  my $res = HTTP::Response->new(
+    @{ $self->pseudo_headers }{qw(Status Reason)},
+    [ %{ $self->headers } ],
+    $self->body
+  );
+  if( my $v = $self->pseudo_headers->{HTTPVersion} ){
+    $res->protocol("HTTP/$v")
+  }
+  return $res;
+}
 
 1;
 
@@ -90,19 +111,27 @@ AnyEvent::HTTP::Response - HTTP Response object for AnyEvent::HTTP
 
 =head1 VERSION
 
-version 0.100
+version 0.300
 
 =head1 SYNOPSIS
 
-  # named arguments (via hashref):
-  AnyEvent::HTTP::Request->new({
-    body    => $body,
-    headers => \%headers,
-    pseudo_headers => \%pseudo,
-  });
+  # parses argument list passed to AnyEvent::HTTP::http_request callback
+  AnyEvent::HTTP::http_request(
+    GET => $uri,
+    sub {
+      my $res = AnyEvent::HTTP::Response->new(@_);
 
-  # argument list like the callback for AnyEvent::HTTP::http_request
-  AnyEvent::HTTP::Request->new($body, \%headers);
+      # inspect attributes
+      print $res->header('Content-Type');
+      print $res->body;
+
+      # upgrade to HTTP::Response
+      my $http_res = $res->to_http_message;
+      if( !$http_res->is_success ){
+        print $http_res->status_line;
+      }
+    }
+  );
 
 =head1 DESCRIPTION
 
@@ -110,20 +139,42 @@ This object represents an HTTP response from L<AnyEvent::HTTP>.
 
 This is a companion class to L<AnyEvent::HTTP::Request>.
 
+It parses the arguments passed to the final callback in
+L<AnyEvent::HTTP/http_request>
+(or produces the arguments that should be passed to that,
+depending on how you'd like to use it).
+and wraps them in an object.
+
+It can also be converted L<from|/from_http_message> or L<to|/to_http_message>
+the more featureful
+L<HTTP::Response>.
+
 =head1 CLASS METHODS
 
 =head2 new
 
-See L</SYNOPSIS> for usage example.
+Accepts an argument list like the callback provided to
+L<AnyEvent::HTTP/http_request>
+(see L</parse_args>):
 
-Accepts a list of arguments
-(like those that would be passed
-to the callback in
-L<AnyEvent::HTTP/http_request>)
-which will be passed through L</parse_args>.
+  AnyEvent::HTTP::Response->new($body, \%headers);
 
-Alternatively a single hashref can be passed
-with anything listed in L</ATTRIBUTES> as the keys.
+Alternatively accepts an instance of
+L<HTTP::Response>
+(see L</from_http_message>):
+
+  AnyEvent::HTTP::Response->new(
+    HTTP::Response->new( $code, $reason, $headers, $body )
+  );
+
+Also accepts a single hashref of named attributes
+(see L</ATTRIBUTES>):
+
+  AnyEvent::HTTP::Response->new({
+    body    => $body,
+    headers => \%headers,
+    pseudo_headers => \%pseudo,
+  });
 
 =head2 parse_args
 
@@ -142,6 +193,11 @@ as described by
 L<AnyEvent::HTTP/http_request>
 (http headers are lower-cased
 and pseudo headers start with an upper case letter).
+
+=head2 from_http_message
+
+Called by the constructor
+when L</new> is passed an instance of L<HTTP::Response>.
 
 =head1 ATTRIBUTES
 
@@ -170,17 +226,12 @@ that L<AnyEvent::HTTP/http_request> returns with the http headers
 Returns a list of arguments like those passed to the callback in
 L<AnyEvent::HTTP/http_request>.
 
-=for test_synopsis my ($body, %headers, %pseudo);
+=head2 to_http_message
 
-=head1 TODO
+Returns an instance of L<HTTP::Response>
+to provide additional functionality.
 
-=over 4
-
-=item *
-
-Provide conversion to/from more featureful L<HTTP::Response>
-
-=back
+=for test_synopsis my ($uri);
 
 =head1 SEE ALSO
 
@@ -188,7 +239,19 @@ Provide conversion to/from more featureful L<HTTP::Response>
 
 =item *
 
+L<AnyEvent::HTTP>
+
+=item *
+
 L<AnyEvent::HTTP::Message> (base class)
+
+=item *
+
+L<HTTP::Response> More featureful object
+
+=item *
+
+L<HTTP::Message::PSGI> Create an L<HTTP::Response> from a L<PSGI> arrayref
 
 =back
 

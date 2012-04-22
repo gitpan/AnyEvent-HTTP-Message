@@ -50,9 +50,12 @@ sub pmver {
 
 eval { $v .= pmver('AnyEvent::HTTP','2') };
 eval { $v .= pmver('Carp','any version') };
+eval { $v .= pmver('Exporter','any version') };
 eval { $v .= pmver('ExtUtils::MakeMaker','6.30') };
 eval { $v .= pmver('File::Find','any version') };
 eval { $v .= pmver('File::Temp','any version') };
+eval { $v .= pmver('HTTP::Message','6') };
+eval { $v .= pmver('Scalar::Util','any version') };
 eval { $v .= pmver('Test::More','0.88') };
 eval { $v .= pmver('parent','any version') };
 eval { $v .= pmver('strict','any version') };
