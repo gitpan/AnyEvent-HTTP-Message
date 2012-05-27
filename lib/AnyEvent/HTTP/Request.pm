@@ -12,7 +12,7 @@ use warnings;
 
 package AnyEvent::HTTP::Request;
 {
-  $AnyEvent::HTTP::Request::VERSION = '0.300';
+  $AnyEvent::HTTP::Request::VERSION = '0.301';
 }
 BEGIN {
   $AnyEvent::HTTP::Request::AUTHORITY = 'cpan:RWSTAUNER';
@@ -83,8 +83,26 @@ sub args {
 
 sub method  { $_[0]->{method} }
 sub uri     { $_[0]->{uri}    }
-sub cb      { $_[0]->{cb}     }
+sub cb      {
+  my $self = shift;
+  $self->_error(
+    q[cb() is a read-only accessor (for consistency and to avoid confusion).],
+    q[To execute the callback dereference it or use respond_with().]
+  )
+    if @_;
+  return $self->{cb};
+}
 sub params  { $_[0]->{params} ||= {} }
+
+
+sub respond_with {
+  my $self = shift;
+  my ($res) = @_; # don't shift
+  require AnyEvent::HTTP::Response;
+  $res =  AnyEvent::HTTP::Response->new(@_)
+    unless do { local $@; eval { $res->isa('AnyEvent::HTTP::Response') } };
+  return $self->cb->($res->args);
+}
 
 
 sub send {
@@ -124,7 +142,7 @@ AnyEvent::HTTP::Request - HTTP Request object for AnyEvent::HTTP
 
 =head1 VERSION
 
-version 0.300
+version 0.301
 
 =head1 SYNOPSIS
 
@@ -291,6 +309,17 @@ This hashref is essentially I<user-agent> parameters.
 Callback subroutine reference
 (last argument to L<AnyEvent::HTTP/http_request>)
 
+B<Note>: For consistency with the other attributes
+(and to avoid confusion with other modules)
+this is a read-only accessor and will C<croak> if passed any arguments.
+
+If you intend to execute the callback (to simulate a response)
+you can dereference the return value:
+
+  $req->cb->($body, $headers);
+
+or use L</respond_with>.
+
 =head1 METHODS
 
 =head2 args
@@ -298,6 +327,21 @@ Callback subroutine reference
 Returns a list of arguments that can be passed to
 L<AnyEvent::HTTP/http_request>
 (beware the sub's prototype, though).
+
+=head2 respond_with
+
+  $req->respond_with($body, \%headers);
+  $req->respond_with(AnyEvent::HTTP::Response->new(@args));
+  $req->respond_with(HTTP::Response->new($code, $message, \@headers, $body));
+
+Simulate a response by calling L</cb>.
+This method is mostly useful for testing,
+but then again so is the whole module.
+
+For convenience this method can accept an instance of
+L<AnyEvent::HTTP::Response>
+or any list of arguments that can be passed to
+L<AnyEvent::HTTP::Response/new>.
 
 =head2 send
 

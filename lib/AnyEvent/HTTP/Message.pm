@@ -12,7 +12,7 @@ use warnings;
 
 package AnyEvent::HTTP::Message;
 {
-  $AnyEvent::HTTP::Message::VERSION = '0.300';
+  $AnyEvent::HTTP::Message::VERSION = '0.301';
 }
 BEGIN {
   $AnyEvent::HTTP::Message::AUTHORITY = 'cpan:RWSTAUNER';
@@ -127,7 +127,7 @@ AnyEvent::HTTP::Message - Lightweight objects for AnyEvent::HTTP Request/Respons
 
 =head1 VERSION
 
-version 0.300
+version 0.301
 
 =head1 SYNOPSIS
 
