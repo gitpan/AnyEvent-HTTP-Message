@@ -1,7 +1,7 @@
 
 
 This archive contains the distribution AnyEvent-HTTP-Message,
-version 0.301:
+version 0.302:
 
   Lightweight objects for AnyEvent::HTTP Request/Response
 

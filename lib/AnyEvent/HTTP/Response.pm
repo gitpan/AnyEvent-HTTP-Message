@@ -12,7 +12,7 @@ use warnings;
 
 package AnyEvent::HTTP::Response;
 {
-  $AnyEvent::HTTP::Response::VERSION = '0.301';
+  $AnyEvent::HTTP::Response::VERSION = '0.302';
 }
 BEGIN {
   $AnyEvent::HTTP::Response::AUTHORITY = 'cpan:RWSTAUNER';
@@ -97,13 +97,13 @@ sub to_http_message {
 
 1;
 
-
 __END__
+
 =pod
 
-=for :stopwords Randy Stauner ACKNOWLEDGEMENTS TODO featureful http
-
 =encoding utf-8
+
+=for :stopwords Randy Stauner ACKNOWLEDGEMENTS TODO featureful http
 
 =head1 NAME
 
@@ -111,7 +111,7 @@ AnyEvent::HTTP::Response - HTTP Response object for AnyEvent::HTTP
 
 =head1 VERSION
 
-version 0.301
+version 0.302
 
 =head1 SYNOPSIS
 
@@ -267,4 +267,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-

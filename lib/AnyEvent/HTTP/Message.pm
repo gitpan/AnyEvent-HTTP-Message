@@ -12,8 +12,10 @@ use warnings;
 
 package AnyEvent::HTTP::Message;
 {
-  $AnyEvent::HTTP::Message::VERSION = '0.301';
+  $AnyEvent::HTTP::Message::VERSION = '0.302';
 }
+# git description: v0.301-3-ge92f3a7
+
 BEGIN {
   $AnyEvent::HTTP::Message::AUTHORITY = 'cpan:RWSTAUNER';
 }
@@ -111,15 +113,15 @@ sub _normalize_headers {
 
 1;
 
-
 __END__
+
 =pod
+
+=encoding utf-8
 
 =for :stopwords Randy Stauner ACKNOWLEDGEMENTS TODO featureful http cpan testmatrix url
 annocpan anno bugtracker rt cpants kwalitee diff irc mailto metadata
 placeholders metacpan
-
-=encoding utf-8
 
 =head1 NAME
 
@@ -127,7 +129,7 @@ AnyEvent::HTTP::Message - Lightweight objects for AnyEvent::HTTP Request/Respons
 
 =head1 VERSION
 
-version 0.301
+version 0.302
 
 =head1 SYNOPSIS
 
@@ -229,51 +231,11 @@ in addition to those websites please use your favorite search engine to discover
 
 =item *
 
-Search CPAN
+MetaCPAN
 
-The default CPAN search engine, useful to view POD in HTML format.
+A modern, open-source CPAN search engine, useful to view POD in HTML format.
 
-L<http://search.cpan.org/dist/AnyEvent-HTTP-Message>
-
-=item *
-
-RT: CPAN's Bug Tracker
-
-The RT ( Request Tracker ) website is the default bug/issue tracking system for CPAN.
-
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=AnyEvent-HTTP-Message>
-
-=item *
-
-CPAN Ratings
-
-The CPAN Ratings is a website that allows community ratings and reviews of Perl modules.
-
-L<http://cpanratings.perl.org/d/AnyEvent-HTTP-Message>
-
-=item *
-
-CPAN Testers
-
-The CPAN Testers is a network of smokers who run automated tests on uploaded CPAN distributions.
-
-L<http://www.cpantesters.org/distro/A/AnyEvent-HTTP-Message>
-
-=item *
-
-CPAN Testers Matrix
-
-The CPAN Testers Matrix is a website that provides a visual overview of the test results for a distribution on various Perls/platforms.
-
-L<http://matrix.cpantesters.org/?dist=AnyEvent-HTTP-Message>
-
-=item *
-
-CPAN Testers Dependencies
-
-The CPAN Testers Dependencies is a website that shows a chart of the test results of all dependencies for a distribution.
-
-L<http://deps.cpantesters.org/?module=AnyEvent::HTTP::Message>
+L<http://metacpan.org/release/AnyEvent-HTTP-Message>
 
 =back
 
@@ -302,4 +264,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-

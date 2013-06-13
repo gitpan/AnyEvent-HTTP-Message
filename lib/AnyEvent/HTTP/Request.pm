@@ -12,7 +12,7 @@ use warnings;
 
 package AnyEvent::HTTP::Request;
 {
-  $AnyEvent::HTTP::Request::VERSION = '0.301';
+  $AnyEvent::HTTP::Request::VERSION = '0.302';
 }
 BEGIN {
   $AnyEvent::HTTP::Request::AUTHORITY = 'cpan:RWSTAUNER';
@@ -65,6 +65,12 @@ sub from_http_message {
     body    => $req->content,
     (ref($extra) eq 'HASH' ? %$extra : ()),
   };
+
+  # rt-85665: AE:H will provide it's own content-length.
+  # If you provide your own it may persist incorrectly across redirects.
+  delete $args->{headers}{$_}
+    for qw( content-length );
+
   return $args;
 }
 
@@ -128,13 +134,13 @@ sub to_http_message {
 
 1;
 
-
 __END__
+
 =pod
 
-=for :stopwords Randy Stauner ACKNOWLEDGEMENTS TODO featureful http uri cb params
-
 =encoding utf-8
+
+=for :stopwords Randy Stauner ACKNOWLEDGEMENTS TODO featureful http uri cb params
 
 =head1 NAME
 
@@ -142,7 +148,7 @@ AnyEvent::HTTP::Request - HTTP Request object for AnyEvent::HTTP
 
 =head1 VERSION
 
-version 0.301
+version 0.302
 
 =head1 SYNOPSIS
 
@@ -389,4 +395,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-

@@ -11,7 +11,7 @@ lib/AnyEvent/HTTP/Message.pm
 lib/AnyEvent/HTTP/Request.pm
 lib/AnyEvent/HTTP/Response.pm
 t/00-compile.t
-t/000-report-versions-tiny.t
+t/00-report-prereqs.t
 t/lib/AEHTTP_Tests.pm
 t/message.t
 t/request.t
@@ -19,6 +19,7 @@ t/response.t
 xt/author/critic.t
 xt/author/pod-spell.t
 xt/author/test-eol.t
+xt/release/changes_has_content.t
 xt/release/cpan-changes.t
 xt/release/dist-manifest.t
 xt/release/distmeta.t
